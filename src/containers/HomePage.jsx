@@ -5,7 +5,7 @@ import moment, { isMoment } from "moment";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import "./HomePage.css";
-import { loadReCaptcha, ReCaptcha } from "react-recaptcha-google";
+// import { loadReCaptcha, ReCaptcha } from "react-recaptcha-google";
 
 class HomePage extends PureComponent {
   constructor(props) {
@@ -15,26 +15,26 @@ class HomePage extends PureComponent {
       clientAddress: "",
       clientPhoneNumber: "",
       orderInfo: "",
-      captchaOK: false,
+      // captchaOK: false,
     };
   }
 
-  componentDidMount() {
-    loadReCaptcha();
-  }
+  // componentDidMount() {
+  //   loadReCaptcha();
+  // }
 
-  onLoadRecaptcha() {
-    if (this.captchaDemo) {
-      this.captchaDemo.reset();
-      this.captchaDemo.execute();
-    }
-  }
+  // onLoadRecaptcha() {
+  //   if (this.captchaDemo) {
+  //     this.captchaDemo.reset();
+  //     this.captchaDemo.execute();
+  //   }
+  // }
 
-  verifyCallback(recaptchaToken) {
-    // Here you will get the final recaptchaToken!!!
-    this.setState({ captchaOK: true });
-    // console.log(recaptchaToken, "<= your recaptcha token");
-  }
+  // verifyCallback(recaptchaToken) {
+  //   // Here you will get the final recaptchaToken!!!
+  //   this.setState({ captchaOK: true });
+  //   // console.log(recaptchaToken, "<= your recaptcha token");
+  // }
 
   submitOrder = () => {
     // console.log(this.state);
@@ -43,15 +43,12 @@ class HomePage extends PureComponent {
       clientName,
       clientPhoneNumber,
       orderInfo,
-      captchaOK,
+      // captchaOK,
     } = this.state;
     if (
       !(
-        clientAddress &&
-        clientName &&
-        clientPhoneNumber &&
-        orderInfo &&
-        captchaOK
+        (clientAddress && clientName && clientPhoneNumber && orderInfo)
+        // && captchaOK
       )
     ) {
       alert("Vui lòng nhập đầy đủ thông tin!");
@@ -90,7 +87,7 @@ class HomePage extends PureComponent {
       clientAddress,
       clientPhoneNumber,
       orderInfo,
-      captchaOK,
+      // captchaOK,
     } = this.state;
     return (
       <div>
@@ -160,16 +157,16 @@ class HomePage extends PureComponent {
                 Thông tin đơn hàng.
               </small>
             </div>
-            <ReCaptcha
+            {/* <ReCaptcha
               sitekey="6LcHx7cZAAAAADM6F46WPCIlwfb6nv0V-YaRThc9"
               onloadCallback={this.onLoadRecaptcha}
               verifyCallback={() => this.setState({ captchaOK: true })}
-            />
+            /> */}
             <button
               className="btn btn-primary"
               style={{ marginTop: "5px" }}
               onClick={() => this.submitOrder()}
-              disabled={captchaOK ? false : true}
+              // disabled={captchaOK ? false : true}
             >
               Đồng ý
             </button>
