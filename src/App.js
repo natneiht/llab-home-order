@@ -6,6 +6,7 @@ import { logginAction } from "./functions";
 import HomePage from "./containers/HomePage";
 import ManageOrders from "./containers/ManageOrders";
 import Login from "./containers/Login";
+import ManageSetting from "./containers/ManageSetting";
 
 class App extends PureComponent {
   constructor(props) {
@@ -37,6 +38,12 @@ class App extends PureComponent {
             path="/admin"
             component={() => <ManageOrders isLogin={isLogin} />}
           />
+          <Route
+            exact
+            path="/setting"
+            component={() => <ManageSetting isLogin={isLogin} />}
+          />
+
           <Route
             exact
             path="/login"

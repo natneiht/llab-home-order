@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import "./HomePage.css";
 // import { loadReCaptcha, ReCaptcha } from "react-recaptcha-google";
+// import { loadReCaptcha, ReCaptcha } from 'react-recaptcha-v3'
 
 class HomePage extends PureComponent {
   constructor(props) {
@@ -16,12 +17,34 @@ class HomePage extends PureComponent {
       clientPhoneNumber: "",
       orderInfo: "",
       // captchaOK: false,
+      selectedDistrict: "",
+      districtList: [],
+      districtLoading: true,
     };
   }
 
-  // componentDidMount() {
-  //   loadReCaptcha();
-  // }
+  async componentDidMount() {
+    // loadReCaptcha();
+    db.collection("options")
+      .doc("districtList")
+      .get()
+      .then((querySnapshot) => {
+        const responseData = querySnapshot.data();
+        const allowedDistrict = Object.keys(responseData).filter(
+          (item) => responseData[item] == true
+        );
+        const districtList = allowedDistrict.sort();
+        console.log(districtList);
+        // const data = querySnapshot.docs.map((doc) =>
+        //   Object.assign(doc.data(), { id: doc.id })
+        // );
+        this.setState({
+          districtList,
+          districtLoading: false,
+          selectedDistrict: districtList[0],
+        });
+      });
+  }
 
   // onLoadRecaptcha() {
   //   if (this.captchaDemo) {
@@ -43,12 +66,13 @@ class HomePage extends PureComponent {
       clientName,
       clientPhoneNumber,
       orderInfo,
+      selectedDistrict,
       // captchaOK,
     } = this.state;
     if (
       !(
         (clientAddress && clientName && clientPhoneNumber && orderInfo)
-        // && captchaOK
+        // captchaOK
       )
     ) {
       alert("Vui lòng nhập đầy đủ thông tin!");
@@ -60,6 +84,7 @@ class HomePage extends PureComponent {
         clientName,
         clientAddress,
         clientPhoneNumber,
+        clientDistrict: selectedDistrict,
         orderInfo,
         orderStatus: false,
         orderPrice: null,
@@ -88,7 +113,14 @@ class HomePage extends PureComponent {
       clientPhoneNumber,
       orderInfo,
       // captchaOK,
+      selectedDistrict,
+      districtList,
+      districtLoading,
     } = this.state;
+
+    console.log(districtList);
+    // console.log(districtLoading);
+    // const renderDistrict = Object.keys(districtList);
     return (
       <div>
         <Header />
@@ -113,7 +145,7 @@ class HomePage extends PureComponent {
                 type="text"
                 className="form-control"
                 id="clientAddress"
-                placeholder="VD: 365F Trần Hưng Đạo, Q1"
+                placeholder="VD: 365F Trần Hưng Đạo"
                 value={clientAddress}
                 onChange={(e) =>
                   this.setState({ clientAddress: e.target.value })
@@ -123,6 +155,25 @@ class HomePage extends PureComponent {
                 Ghi rõ địa chỉ cụ thể.
               </small>
             </div>
+            <div className="form-group">
+              <label htmlFor="clientAddress">Khu vực/ District:</label>
+              <select
+                class="custom-select form-control"
+                value={selectedDistrict}
+                onChange={(e) =>
+                  this.setState({ selectedDistrict: e.target.value })
+                }
+              >
+                {districtLoading && <option value="loading">Loading...</option>}
+                {!districtLoading &&
+                  districtList.map((district) => (
+                    <option value={district} key={district}>
+                      {district}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
             <div className="form-group">
               <label htmlFor="clientPhoneNumber">
                 Số điện thoại/ Phone's number:

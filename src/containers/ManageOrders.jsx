@@ -59,6 +59,7 @@ class ManageOrders extends PureComponent {
       { title: "Tên KH", field: "clientName", type: "string" },
       { title: "Số điện thoại", field: "clientPhoneNumber", type: "string" },
       { title: "Địa chỉ", field: "clientAddress", type: "string" },
+      { title: "Khu vực", field: "clientDistrict", type: "string" },
       { title: "Đơn hàng", field: "orderInfo" },
       {
         title: "Ngày",
@@ -105,6 +106,8 @@ class ManageOrders extends PureComponent {
               Ẩn các đơn hàng đã hoàn thành
             </div>
             <div className="col-2" style={{ textAlign: "center" }}>
+              <Link to="/setting">Setting</Link>
+              {` | `}
               <Link
                 onClick={() => {
                   signOut();
