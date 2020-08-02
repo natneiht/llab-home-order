@@ -91,7 +91,7 @@ class ManageOrders extends PureComponent {
       // { title: "Ngày", field: "submitDateString", hidden: false },
     ];
     if (hideComplete) {
-      renderList = orderList.filter((item) => item["orderStatus"] == "true");
+      renderList = orderList.filter((item) => item["orderStatus"] == "false");
     } else {
       renderList = orderList;
     }
