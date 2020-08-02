@@ -1,10 +1,16 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
 import { db } from "../firebase";
+import { formatCurrency } from "../functions";
 import moment, { isMoment } from "moment";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import "./HomePage.css";
+import {
+  GoogleReCaptcha,
+  GoogleReCaptchaProvider,
+  withGoogleReCaptcha,
+} from "react-google-recaptcha-v3";
 // import { loadReCaptcha, ReCaptcha } from "react-recaptcha-google";
 // import { loadReCaptcha, ReCaptcha } from 'react-recaptcha-v3'
 
@@ -16,32 +22,36 @@ class HomePage extends PureComponent {
       clientAddress: "",
       clientPhoneNumber: "",
       orderInfo: "",
-      // captchaOK: false,
+      captchaOK: false,
       selectedDistrict: "",
       districtList: [],
       districtLoading: true,
+      shippingPrice: 0,
     };
   }
 
   async componentDidMount() {
     // loadReCaptcha();
+    const defaultDistrict = "Quận 1";
     db.collection("options")
       .doc("districtList")
       .get()
       .then((querySnapshot) => {
         const responseData = querySnapshot.data();
-        const allowedDistrict = Object.keys(responseData).filter(
-          (item) => responseData[item] == true
-        );
-        const districtList = allowedDistrict.sort();
-        console.log(districtList);
-        // const data = querySnapshot.docs.map((doc) =>
-        //   Object.assign(doc.data(), { id: doc.id })
-        // );
+        let allowedDistrict = {};
+        Object.keys(responseData).forEach((item) => {
+          if (responseData[item]["active"] == true) {
+            Object.assign(allowedDistrict, {
+              [item]: responseData[item]["price"],
+            });
+          }
+        });
+        const districtList = allowedDistrict;
         this.setState({
           districtList,
           districtLoading: false,
-          selectedDistrict: districtList[0],
+          selectedDistrict: defaultDistrict,
+          shippingPrice: districtList[defaultDistrict],
         });
       });
   }
@@ -60,19 +70,22 @@ class HomePage extends PureComponent {
   // }
 
   submitOrder = () => {
-    // console.log(this.state);
     const {
       clientAddress,
       clientName,
       clientPhoneNumber,
       orderInfo,
       selectedDistrict,
-      // captchaOK,
+      shippingPrice,
+      captchaOK,
     } = this.state;
     if (
       !(
-        (clientAddress && clientName && clientPhoneNumber && orderInfo)
-        // captchaOK
+        clientAddress &&
+        clientName &&
+        clientPhoneNumber &&
+        orderInfo &&
+        captchaOK
       )
     ) {
       alert("Vui lòng nhập đầy đủ thông tin!");
@@ -89,6 +102,7 @@ class HomePage extends PureComponent {
         orderStatus: false,
         orderPrice: null,
         submitTime: currentTime,
+        shippingPrice,
       };
       db.collection("requests")
         .add(submitInfomation)
@@ -112,15 +126,15 @@ class HomePage extends PureComponent {
       clientAddress,
       clientPhoneNumber,
       orderInfo,
-      // captchaOK,
+      captchaOK,
       selectedDistrict,
       districtList,
       districtLoading,
+      shippingPrice,
     } = this.state;
 
-    console.log(districtList);
     // console.log(districtLoading);
-    // const renderDistrict = Object.keys(districtList);
+    const renderDistrict = Object.keys(districtList).sort();
     return (
       <div>
         <Header />
@@ -158,22 +172,29 @@ class HomePage extends PureComponent {
             <div className="form-group">
               <label htmlFor="clientAddress">Khu vực/ District:</label>
               <select
-                class="custom-select form-control"
+                className="custom-select form-control"
                 value={selectedDistrict}
                 onChange={(e) =>
-                  this.setState({ selectedDistrict: e.target.value })
+                  this.setState({
+                    selectedDistrict: e.target.value,
+                    shippingPrice: districtList[e.target.value],
+                  })
                 }
               >
                 {districtLoading && <option value="loading">Loading...</option>}
                 {!districtLoading &&
-                  districtList.map((district) => (
+                  renderDistrict.map((district) => (
                     <option value={district} key={district}>
                       {district}
                     </option>
                   ))}
               </select>
+              {shippingPrice > 0 && (
+                <small id="shippingPrice" className="form-text text-muted">
+                  {`Phí vận chuyển: ${formatCurrency(shippingPrice)}`}
+                </small>
+              )}
             </div>
-
             <div className="form-group">
               <label htmlFor="clientPhoneNumber">
                 Số điện thoại/ Phone's number:
@@ -213,11 +234,17 @@ class HomePage extends PureComponent {
               onloadCallback={this.onLoadRecaptcha}
               verifyCallback={() => this.setState({ captchaOK: true })}
             /> */}
+            <GoogleReCaptchaProvider reCaptchaKey="6Le4xrcZAAAAAHuHK5-XOhWd2PrG6cV9bQdAnfOq">
+              <GoogleReCaptcha
+                onVerify={(token) => this.setState({ captchaOK: true })}
+              />
+            </GoogleReCaptchaProvider>
+
             <button
               className="btn btn-primary"
               style={{ marginTop: "5px" }}
               onClick={() => this.submitOrder()}
-              // disabled={captchaOK ? false : true}
+              disabled={captchaOK ? false : true}
             >
               Đồng ý
             </button>
@@ -231,4 +258,4 @@ class HomePage extends PureComponent {
 
 HomePage.propTypes = {};
 
-export default HomePage;
+export default withGoogleReCaptcha(HomePage);

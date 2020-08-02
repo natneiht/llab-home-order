@@ -71,6 +71,12 @@ class ManageOrders extends PureComponent {
         defaultSort: "desc",
       },
       {
+        title: "Ship",
+        field: "shippingPrice",
+        render: (data) =>
+          data["shippingPrice"] ? formatCurrency(data["shippingPrice"]) : null,
+      },
+      {
         title: "Thành tiền",
         field: "orderPrice",
         render: (data) =>
@@ -109,6 +115,7 @@ class ManageOrders extends PureComponent {
               <Link to="/setting">Setting</Link>
               {` | `}
               <Link
+                to="/login"
                 onClick={() => {
                   signOut();
                   window.location = "/login";
@@ -128,18 +135,6 @@ class ManageOrders extends PureComponent {
                 pageSize: renderList.length < 25 ? renderList.length : 25,
                 exportButton: true,
                 exportAllData: false,
-                // exportCsv: (columns, data) => {
-                //   console.log(data);
-                //   data.map((item, index) => {
-                //     console.log(item);
-                //     return {
-                //       ...data(index),
-                //       submitTime: moment(item["submitTime"]).format(
-                //         "DD/MM/YYYY h:mm:ss a"
-                //       ),
-                //     };
-                //   });
-                // },
               }}
               editable={{
                 // onRowAdd: (newData) =>
@@ -172,10 +167,6 @@ class ManageOrders extends PureComponent {
                     }, 600);
                   }),
               }}
-
-              // onRowClick={(event, data, panel) =>
-              // this.props.history.push("./print-manager/" + data.id)
-              // }
             />
           </div>
         </div>

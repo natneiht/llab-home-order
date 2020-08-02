@@ -22,11 +22,6 @@ class ManageSetting extends PureComponent {
       .get()
       .then((querySnapshot) => {
         const responseData = querySnapshot.data();
-
-        // console.log(districtList);
-        // const data = querySnapshot.docs.map((doc) =>
-        //   Object.assign(doc.data(), { id: doc.id })
-        // );
         this.setState({
           districtList: responseData,
           loading: false,
@@ -51,7 +46,6 @@ class ManageSetting extends PureComponent {
     const localLoginStatus = localStorage.getItem("loginStatus");
     if (!isLogin && !localLoginStatus) return <Redirect to="login" />;
     if (loading) return <div>Loading...</div>;
-
     return (
       <div>
         <Header />
@@ -73,26 +67,49 @@ class ManageSetting extends PureComponent {
               </Link>
             </div>
           </div>
-          <div class="form-group">
-            {Object.keys(districtList).map((district) => (
-              <div class="form-check" key={district}>
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  checked={districtList[district]}
-                  onClick={() => console.log(districtList[district])}
-                  onChange={(e) => {
-                    const newDistrictList = { ...districtList };
-                    newDistrictList[district] = e.target.checked;
-                    console.log(newDistrictList);
-                    this.setState({ districtList: newDistrictList });
-                  }}
-                />
-                <label class="form-check-label" htmlFor={district}>
-                  {district}
-                </label>
-              </div>
-            ))}
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Khu vực</th>
+                <th scope="col">Phí ship</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(districtList).map((district) => (
+                <tr key={district}>
+                  <td>
+                    {" "}
+                    <input
+                      type="checkbox"
+                      checked={districtList[district]["active"]}
+                      onChange={(e) => {
+                        const newDistrictList = { ...districtList };
+                        newDistrictList[district]["active"] = e.target.checked;
+                        this.setState({ districtList: newDistrictList });
+                      }}
+                    />
+                  </td>
+                  <td>{district}</td>
+                  <td>
+                    <input
+                      className="form-control"
+                      type="text"
+                      value={districtList[district]["price"]}
+                      onChange={(e) => {
+                        const newDistrictList = { ...districtList };
+                        newDistrictList[district]["price"] = Number(
+                          e.target.value
+                        );
+                        this.setState({ districtList: newDistrictList });
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="form-group">
             <button
               style={{ marginTop: "25px" }}
               className="btn btn-primary"
