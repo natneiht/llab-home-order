@@ -1,63 +1,63 @@
-import React, { PureComponent } from "react";
-import firebase from "firebase";
-import PropTypes from "prop-types";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import { logginAction, signOut } from "../functions";
-import { Link } from "react-router-dom";
-import "./Login.css";
+import React, { PureComponent } from 'react'
+import firebase from 'firebase'
+import PropTypes from 'prop-types'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import { logginAction, signOut } from '../functions'
+import { Link } from 'react-router-dom'
+import './Login.css'
 
 class Login extends PureComponent {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
-      userName: "",
-      password: "",
-      loginInfo: "",
-    };
+      userName: '',
+      password: '',
+      loginInfo: ''
+    }
   }
 
-  render() {
-    const { userName, password, loginInfo } = this.state;
-    const { doLoginAction, isLogin, userDetail } = this.props;
+  render () {
+    const { userName, password, loginInfo } = this.state
+    const { doLoginAction, isLogin, userDetail } = this.props
     // console.log(this.props);
     // console.log(loginInfo);
     return (
       <div>
         <Header />
-        <div className="container login-wrapper">
+        <div className='container login-wrapper'>
           {isLogin && (
-            <Link to="/admin">Đã đăng nhập, chuyển đến trang Admin!</Link>
+            <Link to='/admin'>Đã đăng nhập, chuyển đến trang Admin!</Link>
           )}
           {!isLogin && (
             <div>
               <div>
-                <label htmlFor="userName">Username:</label>
+                <label htmlFor='userName'>Username:</label>
                 <input
-                  type="text"
-                  className="form-control"
-                  id="userName"
+                  type='text'
+                  className='form-control'
+                  id='userName'
                   value={userName}
-                  onChange={(e) => this.setState({ userName: e.target.value })}
+                  onChange={e => this.setState({ userName: e.target.value })}
                 />
-                <label htmlFor="password">Password:</label>
+                <label htmlFor='password'>Password:</label>
                 <input
-                  type="text"
-                  className="form-control"
-                  id="password"
+                  type='password'
+                  className='form-control'
+                  id='password'
                   value={password}
-                  onChange={(e) => this.setState({ password: e.target.value })}
+                  onChange={e => this.setState({ password: e.target.value })}
                 />
               </div>
               <button
-                style={{ marginTop: "25px" }}
-                className="btn btn-primary"
+                style={{ marginTop: '25px' }}
+                className='btn btn-primary'
                 onClick={() => {
                   doLoginAction(userName, password)
-                    .then((result) => {
-                      this.setState({ loginInfo: result });
+                    .then(result => {
+                      this.setState({ loginInfo: result })
                     })
-                    .catch((err) => alert(err["message"]));
+                    .catch(err => alert(err['message']))
                   //   console.log(loginResult);
                 }}
               >
@@ -78,10 +78,10 @@ class Login extends PureComponent {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 }
 
-Login.propTypes = {};
+Login.propTypes = {}
 
-export default Login;
+export default Login

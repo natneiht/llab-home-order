@@ -1,59 +1,64 @@
-import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
-import { db } from "../firebase";
-import { formatCurrency } from "../functions";
-import moment, { isMoment } from "moment";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import "./HomePage.css";
+import React, { PureComponent } from 'react'
+import PropTypes from 'prop-types'
+import { db } from '../firebase'
+import { formatCurrency } from '../functions'
+import moment, { isMoment } from 'moment'
+import Footer from '../components/Footer'
+import Header from '../components/Header'
+import './HomePage.css'
 import {
   GoogleReCaptcha,
   GoogleReCaptchaProvider,
-  withGoogleReCaptcha,
-} from "react-google-recaptcha-v3";
+  withGoogleReCaptcha
+} from 'react-google-recaptcha-v3'
+import { cityList } from '../config'
 // import { loadReCaptcha, ReCaptcha } from "react-recaptcha-google";
 // import { loadReCaptcha, ReCaptcha } from 'react-recaptcha-v3'
 
 class HomePage extends PureComponent {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
-      clientName: "",
-      clientAddress: "",
-      clientPhoneNumber: "",
-      orderInfo: "",
+      clientName: '',
+      clientAddress: '',
+      clientPhoneNumber: '',
+      orderInfo: '',
       captchaOK: false,
-      selectedDistrict: "",
+      selectedDistrict: '',
+      selectedCity: cityList[0],
       districtList: [],
       districtLoading: true,
-      shippingPrice: 0,
-    };
+      shippingPrice: 0
+    }
   }
 
-  async componentDidMount() {
+  async componentDidMount () {
     // loadReCaptcha();
-    const defaultDistrict = "Quận 1";
-    db.collection("options")
-      .doc("districtList")
+    const defaultDistrict = 'Quận 1'
+    db.collection('options')
+      .doc('districtList')
       .get()
-      .then((querySnapshot) => {
-        const responseData = querySnapshot.data();
-        let allowedDistrict = {};
-        Object.keys(responseData).forEach((item) => {
-          if (responseData[item]["active"] == true) {
+      .then(querySnapshot => {
+        const responseData = querySnapshot.data()
+        let allowedDistrict = {}
+        Object.keys(responseData).forEach(item => {
+          if (responseData[item]['active'] == true) {
             Object.assign(allowedDistrict, {
-              [item]: responseData[item]["price"],
-            });
+              [item]: {
+                price: responseData[item]['price'],
+                city: responseData[item]['city']
+              }
+            })
           }
-        });
-        const districtList = allowedDistrict;
+        })
+        const districtList = allowedDistrict
         this.setState({
           districtList,
           districtLoading: false,
           selectedDistrict: defaultDistrict,
-          shippingPrice: districtList[defaultDistrict],
-        });
-      });
+          shippingPrice: districtList[defaultDistrict]
+        })
+      })
   }
 
   // onLoadRecaptcha() {
@@ -75,10 +80,11 @@ class HomePage extends PureComponent {
       clientName,
       clientPhoneNumber,
       orderInfo,
+      selectedCity,
       selectedDistrict,
       shippingPrice,
-      captchaOK,
-    } = this.state;
+      captchaOK
+    } = this.state
     if (
       !(
         clientAddress &&
@@ -88,144 +94,175 @@ class HomePage extends PureComponent {
         captchaOK
       )
     ) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
-      return;
+      alert('Vui lòng nhập đầy đủ thông tin!')
+      return
     }
     try {
-      const currentTime = new Date().getTime();
+      const currentTime = new Date().getTime()
       const submitInfomation = {
         clientName,
         clientAddress,
         clientPhoneNumber,
+        clientCity: selectedCity,
         clientDistrict: selectedDistrict,
         orderInfo,
         orderStatus: false,
         orderPrice: null,
         submitTime: currentTime,
-        shippingPrice,
-      };
-      db.collection("requests")
+        shippingPrice
+      }
+      db.collection('requests')
         .add(submitInfomation)
-        .then((ref) => {
-          alert("Đơn hàng đã được ghi nhận!");
+        .then(ref => {
+          alert('Đơn hàng đã được ghi nhận!')
           // Clear old info
           this.setState({
-            clientName: "",
-            clientAddress: "",
-            clientPhoneNumber: "",
-            orderInfo: "",
-          });
-        });
+            clientName: '',
+            clientAddress: '',
+            clientPhoneNumber: '',
+            orderInfo: ''
+          })
+        })
     } catch (error) {
-      alert("Không thể tạo đơn hàng. Lỗi: " + error);
+      alert('Không thể tạo đơn hàng. Lỗi: ' + error)
     }
-  };
-  render() {
+  }
+  render () {
     const {
       clientName,
       clientAddress,
       clientPhoneNumber,
       orderInfo,
       captchaOK,
+      selectedCity,
       selectedDistrict,
       districtList,
       districtLoading,
-      shippingPrice,
-    } = this.state;
+      shippingPrice
+    } = this.state
 
-    // console.log(districtLoading);
-    const renderDistrict = Object.keys(districtList).sort();
+    console.log(Object.keys(districtList))
+    let renderDistrict
+    if (districtList) {
+      renderDistrict = Object.keys(districtList)
+        .filter(dist => districtList[dist]['city'] === selectedCity)
+        .sort()
+    }
+    console.log(renderDistrict)
     return (
       <div>
         <Header />
-        <div className="container main-wrapper">
-          <div className="client-form">
-            <div className="form-group">
-              <label htmlFor="clientName">
+        <div className='container main-wrapper'>
+          <div className='client-form'>
+            <div className='form-group'>
+              <label htmlFor='clientName'>
                 Tên khách hàng / Client's name:
               </label>
               <input
-                type="text"
-                className="form-control"
-                id="clientName"
-                aria-describedby="clientName"
+                type='text'
+                className='form-control'
+                id='clientName'
+                aria-describedby='clientName'
                 value={clientName}
-                onChange={(e) => this.setState({ clientName: e.target.value })}
+                onChange={e => this.setState({ clientName: e.target.value })}
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="clientAddress">Địa chỉ/ Address:</label>
+            <div className='form-group'>
+              <label htmlFor='clientAddress'>Địa chỉ/ Address:</label>
               <input
-                type="text"
-                className="form-control"
-                id="clientAddress"
-                placeholder="VD: 365F Trần Hưng Đạo"
+                type='text'
+                className='form-control'
+                id='clientAddress'
+                placeholder='VD: 365F Trần Hưng Đạo'
                 value={clientAddress}
-                onChange={(e) =>
-                  this.setState({ clientAddress: e.target.value })
-                }
+                onChange={e => this.setState({ clientAddress: e.target.value })}
               />
-              <small id="clientAddressHelp" className="form-text text-muted">
+              <small id='clientAddressHelp' className='form-text text-muted'>
                 Ghi rõ địa chỉ cụ thể.
               </small>
             </div>
-            <div className="form-group">
-              <label htmlFor="clientAddress">Khu vực/ District:</label>
+            <div className='form-group'>
+              <label htmlFor='clientAddress'>Thành phố/ City:</label>
               <select
-                className="custom-select form-control"
-                value={selectedDistrict}
-                onChange={(e) =>
+                className='custom-select form-control'
+                value={selectedCity}
+                onChange={e =>
                   this.setState({
-                    selectedDistrict: e.target.value,
-                    shippingPrice: districtList[e.target.value],
+                    selectedCity: e.target.value
                   })
                 }
               >
-                {districtLoading && <option value="loading">Loading...</option>}
+                {/* {districtLoading && <option value='loading'>Loading...</option>} */}
+                {cityList.map(district => (
+                  <option value={district} key={district}>
+                    {district}
+                  </option>
+                ))}
+              </select>
+              {shippingPrice > 0 && (
+                <small id='shippingPrice' className='form-text text-muted'>
+                  {`Phí vận chuyển: ${formatCurrency(shippingPrice)}`}
+                </small>
+              )}
+            </div>
+
+            <div className='form-group'>
+              <label htmlFor='clientAddress'>Khu vực/ District:</label>
+              <select
+                className='custom-select form-control'
+                value={selectedDistrict}
+                onChange={e =>
+                  this.setState({
+                    selectedDistrict: e.target.value,
+                    shippingPrice: districtList[e.target.value]['price']
+                  })
+                }
+              >
+                {districtLoading && <option value='loading'>Loading...</option>}
                 {!districtLoading &&
-                  renderDistrict.map((district) => (
+                  renderDistrict.map(district => (
                     <option value={district} key={district}>
                       {district}
                     </option>
                   ))}
               </select>
               {shippingPrice > 0 && (
-                <small id="shippingPrice" className="form-text text-muted">
+                <small id='shippingPrice' className='form-text text-muted'>
                   {`Phí vận chuyển: ${formatCurrency(shippingPrice)}`}
                 </small>
               )}
             </div>
-            <div className="form-group">
-              <label htmlFor="clientPhoneNumber">
+            <div className='form-group'>
+              <label htmlFor='clientPhoneNumber'>
                 Số điện thoại/ Phone's number:
               </label>
               <input
-                type="text"
-                className="form-control"
-                id="clientPhoneNumber"
-                placeholder="VD: 0909123456"
+                type='text'
+                className='form-control'
+                id='clientPhoneNumber'
+                placeholder='VD: 0909123456'
                 value={clientPhoneNumber}
-                onChange={(e) =>
+                onChange={e =>
                   this.setState({ clientPhoneNumber: e.target.value })
                 }
               />
-              <small id="clientPhoneNumber" className="form-text text-muted">
+              <small id='clientPhoneNumber' className='form-text text-muted'>
                 Ghi rõ số điện thoại để nhân viên liên hệ.
               </small>
             </div>
-            <div className="form-group">
-              <label htmlFor="clientPhoneNumber">
+            <div className='form-group'>
+              <label htmlFor='clientPhoneNumber'>
                 Thông tin đơn hàng/ Order's information:
               </label>
               <input
-                type="text"
-                className="form-control"
-                id="orderInfo"
-                placeholder="VD: 02 cuộn Kodak Ultramax 400"
+                type='text'
+                className='form-control'
+                id='orderInfo'
+                placeholder='VD: 02 cuộn Kodak Ultramax 400'
                 value={orderInfo}
-                onChange={(e) => this.setState({ orderInfo: e.target.value })}
+                onChange={e => this.setState({ orderInfo: e.target.value })}
               />
-              <small id="orderInfo" className="form-text text-muted">
+              <small id='orderInfo' className='form-text text-muted'>
                 Thông tin đơn hàng.
               </small>
             </div>
@@ -234,15 +271,15 @@ class HomePage extends PureComponent {
               onloadCallback={this.onLoadRecaptcha}
               verifyCallback={() => this.setState({ captchaOK: true })}
             /> */}
-            <GoogleReCaptchaProvider reCaptchaKey="6Le4xrcZAAAAAHuHK5-XOhWd2PrG6cV9bQdAnfOq">
+            <GoogleReCaptchaProvider reCaptchaKey='6Le4xrcZAAAAAHuHK5-XOhWd2PrG6cV9bQdAnfOq'>
               <GoogleReCaptcha
-                onVerify={(token) => this.setState({ captchaOK: true })}
+                onVerify={token => this.setState({ captchaOK: true })}
               />
             </GoogleReCaptchaProvider>
 
             <button
-              className="btn btn-primary"
-              style={{ marginTop: "5px" }}
+              className='btn btn-primary'
+              style={{ marginTop: '5px' }}
               onClick={() => this.submitOrder()}
               disabled={captchaOK ? false : true}
             >
@@ -252,10 +289,10 @@ class HomePage extends PureComponent {
         </div>
         <Footer />
       </div>
-    );
+    )
   }
 }
 
-HomePage.propTypes = {};
+HomePage.propTypes = {}
 
-export default withGoogleReCaptcha(HomePage);
+export default withGoogleReCaptcha(HomePage)
