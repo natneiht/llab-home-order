@@ -2,8 +2,7 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import Header from '../components/Header'
 import { Redirect } from 'react-router'
-import { signOut } from '../functions'
-import { db } from '../firebase'
+import { userLogout } from '../functions'
 import './ManageOrders.css'
 import { Link } from 'react-router-dom'
 
@@ -18,35 +17,35 @@ class ManageSetting extends PureComponent {
   }
 
   async componentDidMount () {
-    db.collection('options')
-      .doc('districtList')
-      .get()
-      .then(querySnapshot => {
-        const responseData = querySnapshot.data()
-        this.setState({
-          districtList: responseData,
-          loading: false
-        })
-      })
+    // db.collection('options')
+    //   .doc('districtList')
+    //   .get()
+    //   .then(querySnapshot => {
+    //     const responseData = querySnapshot.data()
+    //     this.setState({
+    //       districtList: responseData,
+    //       loading: false
+    //     })
+    //   })
   }
 
   saveSetting = () => {
     const { districtList } = this.state
-    db.collection('options')
-      .doc('districtList')
-      .set(districtList)
-      .then(() => {
-        alert('Đã lưu lại tùy chọn!')
-        window.location = '/admin'
-      })
-      .catch(err => alert(`Lỗi: ${err}`))
+    // db.collection('options')
+    //   .doc('districtList')
+    //   .set(districtList)
+    //   .then(() => {
+    //     alert('Đã lưu lại tùy chọn!')
+    //     window.location = '/admin'
+    //   })
+    //   .catch(err => alert(`Lỗi: ${err}`))
   }
 
   render () {
     const { isLogin } = this.props
     const { districtList, currentCity, loading } = this.state
     const localLoginStatus = localStorage.getItem('loginStatus')
-    console.log(districtList)
+    // console.log(districtList)
     if (!isLogin && !localLoginStatus) return <Redirect to='login' />
     if (loading) return <div>Loading...</div>
     // let renderList = []
@@ -85,7 +84,7 @@ class ManageSetting extends PureComponent {
               {` | `}
               <Link
                 onClick={() => {
-                  signOut()
+                  userLogout()
                   window.location = '/login'
                   //   this.setState({ loginInfo: loginResult });
                 }}

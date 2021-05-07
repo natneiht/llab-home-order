@@ -2,9 +2,8 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import MaterialTable from 'material-table'
 import moment from 'moment'
-import { db } from '../firebase'
 import { Redirect } from 'react-router'
-import { signOut, formatCurrency } from '../functions'
+import { userLogout, formatCurrency } from '../functions'
 import './ManageOrders.css'
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
@@ -21,20 +20,20 @@ class ManageOrders extends PureComponent {
   }
 
   async componentDidMount () {
-    db.collection('requests')
-      .get()
-      .then(querySnapshot => {
-        const data = querySnapshot.docs.map(doc =>
-          Object.assign(doc.data(), { id: doc.id })
-        )
-        this.setState({ orderList: data, loading: false })
-      })
+    // db.collection('requests')
+    //   .get()
+    //   .then(querySnapshot => {
+    //     const data = querySnapshot.docs.map(doc =>
+    //       Object.assign(doc.data(), { id: doc.id })
+    //     )
+    //     this.setState({ orderList: data, loading: false })
+    //   })
   }
 
   updateOrderDetail = (id, detail) => {
-    db.collection('requests')
-      .doc(id)
-      .set(detail)
+    // db.collection('requests')
+    //   .doc(id)
+    //   .set(detail)
     // .then((result) => console.log(result))
     // .catch((err) => console.log(err));
   }
@@ -42,11 +41,11 @@ class ManageOrders extends PureComponent {
   removeOrder = id => {
     const result = window.confirm('Bạn có chắc chắn xóa đơn hàng này không?')
     if (!result) return
-    db.collection('requests')
-      .doc(id)
-      .delete()
-      .then(() => alert('Đã xóa thành công!'))
-      .catch(err => alert('Lỗi: ' + err))
+    // db.collection('requests')
+    //   .doc(id)
+    //   .delete()
+    //   .then(() => alert('Đã xóa thành công!'))
+    //   .catch(err => alert('Lỗi: ' + err))
   }
 
   render () {
@@ -118,7 +117,7 @@ class ManageOrders extends PureComponent {
               <Link
                 to='/login'
                 onClick={() => {
-                  signOut()
+                  userLogout()
                   window.location = '/login'
                   //   this.setState({ loginInfo: loginResult });
                 }}
