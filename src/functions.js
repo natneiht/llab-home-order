@@ -37,7 +37,6 @@ export async function getGuestToken () {
 
 export async function getNewGuestToken () {
   const guestTokenResponse = await Axios.post(API_URL.GUEST_LOGIN)
-    // console.log('Response:',guestTokenResponse)
     if (guestTokenResponse.hasOwnProperty('data')){
     if (guestTokenResponse && guestTokenResponse.data.data.can_login) {
       const guestToken = guestTokenResponse.data.data.token
@@ -49,9 +48,6 @@ export async function getNewGuestToken () {
 
 export async function userLogin (user, password, guestToken) {
     try {
-      // this.setState({ processingLogin: true })
-      // const guestToken = await getGuestToken()
-      // console.log(guestToken)
       if (guestToken) {
         const rawData = {
           email: user,
@@ -64,18 +60,14 @@ export async function userLogin (user, password, guestToken) {
             Authorization: guestToken
           }
         })
-        // console.log(loginResult)
         if (loginResult && loginResult.hasOwnProperty('data')) {
           const userToken = loginResult.data.data.token
-          // console.log(userToken)
           localStorage.setItem('_tk', userToken)
           localStorage.setItem('_isLg', '1')
-          // this.props.history.push('/')
           return userToken
         }
       }
     } catch (error) {
-      // console.log(error.response)
       if (error.response) {
         const errorResponse = error.response.data
         if (errorResponse.code === 'EMAIL_NOT_VERIFIED') {

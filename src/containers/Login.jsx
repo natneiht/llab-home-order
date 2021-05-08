@@ -7,6 +7,7 @@ import { userLogin, getGuestToken, getOldSession } from '../functions'
 import { API_URL } from '../config'
 import { Link, Redirect } from 'react-router-dom'
 import './Login.css'
+import { withAuthContext } from '../authContext'
 
 class Login extends PureComponent {
   constructor (props) {
@@ -20,27 +21,6 @@ class Login extends PureComponent {
     }
   }
 
-  // async generateGuestToken () {
-  //   // const oldGuestToken = getOldSession()
-  //   // console.log(oldGuestToken)
-  //   // if (!oldGuestToken) {
-  //   // const newGuestToken = await getGuestToken()
-  //   // return newGuestToken
-  //   const guestToken = await getGuestToken()
-  //   console.log(guestToken)
-  //   if (guestToken) {
-  //     this.setState({
-  //       guestToken,
-  //       guestTokenLoading: false
-  //     })
-  //   } else {
-  //     this.setState({
-  //       guestToken: null,
-  //       guestTokenLoading: false
-  //     })
-  //   }
-  // }
-
   async doLoginAction (user, password) {
     this.setState({ processingLogin: true })
     const guestToken = await getGuestToken()
@@ -48,15 +28,9 @@ class Login extends PureComponent {
     if (guestToken) {
       try {
         const userLoginResponse = await userLogin(user, password, guestToken)
-        // console.log(userLoginResponse)
         if (userLoginResponse && userLoginResponse.hasOwnProperty('data')) {
           const userToken = userLoginResponse.data.data.token
-          this.props.setLoginStatus(
-            true,
-            userToken,
-            false
-            // loginResponse.data.data
-          )
+          this.props.setLoginStatus(true, userToken, false)
         }
       } catch (error) {
         console.log(error.message)
@@ -69,9 +43,6 @@ class Login extends PureComponent {
   render () {
     const { userName, password, loginInfo, processingLogin } = this.state
     const { doLoginAction, isLogin, userDetail } = this.props
-    // console.log('Login state:', this.state)
-    // console.log(this.props);
-    // console.log(loginInfo);
     return (
       <div>
         <Header />
@@ -104,27 +75,13 @@ class Login extends PureComponent {
                 className='btn btn-primary'
                 disabled={processingLogin ? 'true' : ''}
                 onClick={() => {
-                  this.doLoginAction(userName, password)
-                    // .then(result => {
-                    //   console.log(result)
-                    // this.setState({ loginInfo: result })
-                    // })
-                    .catch(err => alert(err['message']))
-                  //   console.log(loginResult);
+                  this.doLoginAction(userName, password).catch(err =>
+                    alert(err['message'])
+                  )
                 }}
               >
                 {processingLogin ? 'Processing...' : 'Login'}
               </button>
-              {/* <button
-                className="btn btn-primary"
-                onClick={() => {
-                  signOut();
-                  //   this.setState({ loginInfo: loginResult });
-                }}
-              >
-                Logout
-              </button>
-              <Link to="/admin">Admin</Link> */}
             </div>
           )}
         </div>
@@ -136,4 +93,4 @@ class Login extends PureComponent {
 
 Login.propTypes = {}
 
-export default Login
+export default withAuthContext(Login)

@@ -2,13 +2,9 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import './Header.css'
 import { Link } from 'react-router-dom'
-// import { isLogin } from "../utils";
-// import firebase from "firebase";
 
 class Header extends PureComponent {
   render () {
-    // const user = firebase.auth().currentUser;
-    // console.log(user);
     const navBarLink = [
       { text: 'GIỚI THIỆU', link: 'https://llab.vn/gioi-thieu/' },
       { text: 'TRÁNG & SCAN', link: 'https://llab.vn/dich-vu/' },

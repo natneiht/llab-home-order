@@ -2,11 +2,12 @@ import React, { PureComponent } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { BrowserRouter, Switch, Route, Link, NavLink } from "react-router-dom";
-import { userLogin, getOldSession } from "./functions";
+import { userLogin, getOldSession, userGetProfile, getShippingRates } from "./functions";
 import HomePage from "./containers/HomePage";
 import ManageOrders from "./containers/ManageOrders";
 import Login from "./containers/Login";
 import ManageSetting from "./containers/ManageSetting";
+import {AuthProvider} from './authContext'
 
 class App extends PureComponent {
   constructor(props) {
@@ -17,13 +18,13 @@ class App extends PureComponent {
       guestToken: null,
       userToken: null,
       userDetail: null,
+      shippingRate: []
     };
   }
 
 
- async componentDidMount() {
+ componentDidMount = async () => {
    const oldSession = await getOldSession();
-  //  console.log(oldSession)
    if(oldSession){
      this.setState({
        checkingLoginStatus: false,
@@ -38,27 +39,63 @@ class App extends PureComponent {
        userToken: null
      })
    }
+
+   // Set interval for checking notifications
+  // this.interval = setInterval(() => this.checkUserNotification(), 5000);
+
  }
 
- setLoginStatus (isLogin, token, isError) {
+ setLoginStatus = (isLogin, token, isError) => {
    this.setState({
     isLogin,
     userToken: token
   })
  }
  
- setUserDetail (userDetail) {
+ setUserDetail = (userDetail) => {
    this.setState ( {userDetail})
  }
 
+ checkShippingRate = () => {
+   getShippingRates(this.state.userToken).then( response =>
+   this.setState({shippingRate: response}))
+ }
+// This function for getting user's profile and checking notifications
+checkUserNotification = () => {
+  const { isLogin, userToken } = this.state
+  if(isLogin) {
+    userGetProfile(userToken).then(response => {
+      if(response && response.hasOwnProperty('data')) {
+        const userInfo = response.data
+        this.setUserDetail(userInfo)
+      }
+    }).catch( err => console.log(err))
+  }
+}
+
+// componentWillUnmount() {
+//   clearInterval(this.interval);
+// }
+
   render() {
-    const { isLogin, userDetail, userToken } = this.state;
-    // console.log(this.state)
+    const { isLogin, userDetail, userToken, shippingRate } = this.state;
     return (
+        <AuthProvider
+        value={{
+          isLogin,
+          userDetail,
+          userToken,
+          shippingRate,
+          setLoginStatus: this.setLoginStatus,
+          checkShippingRate: this.checkShippingRate,
+          checkUserNotification: this.checkUserNotification
+        }}
+      >
+
       <BrowserRouter>
         <Switch>
           <Route exact path="/"
-            component={() => <HomePage isLogin={isLogin} token={userToken} userDetail={userDetail} setUserDetail={this.setUserDetail} />} />
+            component={() => <HomePage  />} />
           {/* <Route
             exact
             path="/admin"
@@ -74,10 +111,7 @@ class App extends PureComponent {
             exact
             path="/login"
             component={() => (
-              <Login
-                isLogin = {isLogin}
-                setLoginStatus={this.setLoginStatus}
-              />
+              <Login />
             )}
           />
           <Route
@@ -91,6 +125,7 @@ class App extends PureComponent {
           />
         </Switch>
       </BrowserRouter>
+      </AuthProvider>
     );
   }
 }

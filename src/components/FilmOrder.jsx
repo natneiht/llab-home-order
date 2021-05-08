@@ -4,41 +4,80 @@ import {
   GoogleReCaptchaProvider,
   withGoogleReCaptcha
 } from 'react-google-recaptcha-v3'
-
+import { formatCurrency } from '../functions'
 import PropTypes from 'prop-types'
+import { withAuthContext } from '../authContext'
 
 class FilmOrder extends PureComponent {
   constructor (props) {
     super(props)
     this.state = {
-      address: null,
-      info: null,
-      phone: null,
+      address: '',
+      info: '',
+      phone: '',
       reCaptcha_v3_token: null,
-      shippingRateId: null
+      shippingRateId: null,
+      cityList: [],
+      districtList: [],
+      currentCity: '',
+      currentDistrict: '',
+      shippingPrice: 0
     }
   }
 
-  componentDidMount () {
-    // Init basic info
-    const { userDetail } = this.props
-    // if (userDetail && userDetail.hasOwnProperty('data')) {
-    //   this.setState({
-    //     phone: userDetail.data.phone
-    //   })
-    // }
+  componentDidMount = () => {
+    const { shippingRate } = this.props
+    // Filter city in list
+    const cityArray = shippingRate.map(item => item['city'])
+    const cityList = Array.from(new Set(cityArray))
+
+    // Get
+    const districtList = shippingRate.filter(item => item.city == cityList[0])
+    if (cityList.length != 0 && districtList.length != 0) {
+      this.setState({
+        currentCity: cityList[0],
+        cityList,
+        currentDistrict: districtList[0]['name'],
+        districtList,
+        shippingPrice: districtList[0]['price']
+      })
+      // this.handleChangeDistrict(districtList[0]['name'])
+    }
+  }
+
+  handleChangeDistrict = dName => {
+    const { shippingRate } = this.props
+    const dIndex = shippingRate.findIndex(item => item['name'] == dName)
+    if (dIndex != -1) {
+      const shippingRateItem = shippingRate[dIndex]
+      this.setState({
+        currentDistrict: dName,
+        shippingPrice: shippingRateItem['price'],
+        shippingRateId: shippingRateItem['id']
+      })
+    }
   }
 
   render () {
     const { userDetail, shippingRate, createFilmOder } = this.props
-    const { address, phone, info, shippingRateId } = this.state
+    const {
+      address,
+      phone,
+      info,
+      shippingRateId,
+      currentCity,
+      currentDistrict,
+      shippingPrice,
+      cityList,
+      districtList
+    } = this.state
     let fullName
 
-    if (userDetail && userDetail.hasOwnProperty('data')) {
-      fullName = userDetail.data.full_name
-      if (phone === null)
+    if (userDetail) {
+      fullName = userDetail.full_name
+      if (!phone)
         this.setState({
-          phone: userDetail.data.phone
+          phone: userDetail.phone
         })
     }
 
@@ -74,18 +113,18 @@ class FilmOrder extends PureComponent {
             <label htmlFor='clientAddress'>Thành phố/ City:</label>
             <select
               className='custom-select form-control'
-              //   value={selectedCity}
+              value={currentCity}
               onChange={e =>
                 this.setState({
-                  selectedCity: e.target.value
+                  currentCity: e.target.value
                 })
               }
             >
-              {/* {cityList.map(district => (
+              {cityList.map(district => (
                 <option value={district} key={district}>
                   {district}
                 </option>
-              ))} */}
+              ))}
             </select>
             {/* {shippingPrice > 0 && (
               <small id='shippingPrice' className='form-text text-muted'>
@@ -98,27 +137,29 @@ class FilmOrder extends PureComponent {
             <label htmlFor='clientAddress'>Khu vực/ District:</label>
             <select
               className='custom-select form-control'
-              //   value={selectedDistrict}
-              //   onChange={e =>
-              //     this.setState({
-              //       selectedDistrict: e.target.value,
-              //       shippingPrice: districtList[e.target.value]['price']
-              //     })
-              //   }
+              value={currentDistrict}
+              onChange={e => {
+                this.setState({
+                  currentDistrict: e.target.value
+                })
+                this.handleChangeDistrict(e.target.value)
+              }}
             >
-              {/* {districtLoading && <option value='loading'>Loading...</option>}
-              {!districtLoading &&
-                renderDistrict.map(district => (
-                  <option value={district} key={district}>
-                    {district}
+              {districtList.length == 0 && (
+                <option value='loading'>Loading...</option>
+              )}
+              {districtList.length != 0 &&
+                districtList.map(district => (
+                  <option value={district['name']} key={district['id']}>
+                    {district['name']}
                   </option>
-                ))} */}
+                ))}
             </select>
-            {/* {shippingPrice > 0 && (
+            {shippingPrice > 0 && (
               <small id='shippingPrice' className='form-text text-muted'>
                 {`Phí vận chuyển: ${formatCurrency(shippingPrice)}`}
               </small>
-            )} */}
+            )}
           </div>
           <div className='form-group'>
             <label htmlFor='clientPhoneNumber'>
@@ -175,4 +216,4 @@ class FilmOrder extends PureComponent {
 
 FilmOrder.propTypes = {}
 
-export default FilmOrder
+export default withAuthContext(FilmOrder)
